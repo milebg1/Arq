@@ -280,7 +280,6 @@ int ler_e_inserir_dados(const char *arquivo_csv, FILE *arquivo_produtos, FILE *a
 		strcpy(acesso_lido.user_id, registro_lido.user_id);
 		acesso_lido.ativo=1;
 		
-		// Grava o registro no arquivo de acessos
         long offset_acesso = ftell(arquivo_acessos); 
         fwrite(&acesso_lido, sizeof(Acesso), 1, arquivo_acessos);
 
