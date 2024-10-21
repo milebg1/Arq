@@ -13,7 +13,7 @@ typedef struct {
    float price;
    char user_id[50];
    char user_session[50];
-   int ativo;  // Campo para indicar se o registro está ativo (1) ou removido (0)
+   int ativo; 
 } Registro;
 typedef struct {
    double sequencial;
@@ -68,18 +68,18 @@ void mostrar_acessos(FILE *arquivo_acessos) {
 
 int pesquisa_binaria (FILE *arquivo_indice, double chave, Indice *indice_encontrado){
 	fseek(arquivo_indice, 0, SEEK_END);
-    long tamanho_indice = ftell(arquivo_indice) / sizeof(Indice); // Calcula o número de entradas no índice
+    long tamanho_indice = ftell(arquivo_indice) / sizeof(Indice); 
     long inicio = 0;
     long fim = tamanho_indice - 1;
 
     while (inicio <= fim) {
         long meio = (inicio + fim) / 2;
-        fseek(arquivo_indice, meio * sizeof(Indice), SEEK_SET); // Pula para o meio do arquivo
+        fseek(arquivo_indice, meio * sizeof(Indice), SEEK_SET);
         Indice indice_atual;
         fread(&indice_atual, sizeof(Indice), 1, arquivo_indice);
 
         if (indice_atual.chave == chave) {
-            *indice_encontrado = indice_atual; // Chave encontrada
+            *indice_encontrado = indice_atual; 
             return 1;
         } else if (indice_atual.chave < chave) {
             inicio = meio + 1;
@@ -87,24 +87,21 @@ int pesquisa_binaria (FILE *arquivo_indice, double chave, Indice *indice_encontr
             fim = meio - 1;
         }
     }
-    return 0; // Chave não encontrada
+    return 0; 
 }
 
 Acesso buscar_acesso (FILE *arquivo_dados, FILE *arquivo_indice, double chave) {
     Indice indice_encontrado;
 
-    // Primeira etapa: busca no arquivo de índice usando pesquisa binária
     if (pesquisa_binaria(arquivo_indice, chave, &indice_encontrado)) {
-        // Segunda etapa: usando o offset encontrado para buscar o registro no arquivo de dados
-        fseek(arquivo_dados, indice_encontrado.file_offset, SEEK_SET); // Vai para o offset no arquivo de dados
+        fseek(arquivo_dados, indice_encontrado.file_offset, SEEK_SET); 
         Acesso registro;
-        fread(&registro, sizeof(Acesso), 1, arquivo_dados); // Lê o registro
+        fread(&registro, sizeof(Acesso), 1, arquivo_dados); 
         
-        printf("Registro encontrado: %.0f | %s | %s | %s \n", registro.sequencial, registro.event_time, registro.user_id, registro.event_type); // Exibe o registro encontrado
+        printf("Registro encontrado: %.0f | %s | %s | %s \n", registro.sequencial, registro.event_time, registro.user_id, registro.event_type); 
         return registro;
     }
 
-    // Se não encontrado, retorna um registro vazio com chave -1
     Acesso registro_vazio = {-1, "", "",""};
     printf("Registro com chave %.0f nao encontrado.\n", chave);
     return registro_vazio;
@@ -113,19 +110,15 @@ Acesso buscar_acesso (FILE *arquivo_dados, FILE *arquivo_indice, double chave) {
 Produto buscar_produto (FILE *arquivo_dados, FILE *arquivo_indice, double chave) {
     Indice indice_encontrado;
 
-    // Primeira etapa: busca no arquivo de índice usando pesquisa binária
     if (pesquisa_binaria(arquivo_indice, chave, &indice_encontrado)) {
-        // Segunda etapa: usando o offset encontrado para buscar o registro no arquivo de dados
-        fseek(arquivo_dados, indice_encontrado.file_offset, SEEK_SET); // Vai para o offset no arquivo de dados
+        fseek(arquivo_dados, indice_encontrado.file_offset, SEEK_SET); 
         Produto registro;
-        fread(&registro, sizeof(Produto), 1, arquivo_dados); // Lê o registro
-        
-        
+        fread(&registro, sizeof(Produto), 1, arquivo_dados); 
+               
         printf("Registro encontrado: %.0f | %s | %s | %.2f \n", registro.sequencial, registro.brand, registro.product_id, registro.price); // Exibe o registro encontrado
         return registro;
     }
 
-    // Se não encontrado, retorna um registro vazio com chave -1
     Produto registro_vazio = {-1, "", "", 0};
     printf("Registro com chave %.0f nao encontrado.\n", chave);
     return registro_vazio;
@@ -148,8 +141,8 @@ void inserir_novo_acesso(FILE *arquivo_dados, FILE *arquivo_indice, Registro nov
     
     long offset = ftell(arquivo_dados);
     
-    acesso.sequencial = offset / sizeof(Acesso) + 1;  // Sequencial gerado
-    acesso.ativo = 1;  // Marca como ativo
+    acesso.sequencial = offset / sizeof(Acesso) + 1;  
+    acesso.ativo = 1;  
     strcpy(acesso.event_time, novo_registro.event_time);
     strcpy(acesso.event_type, novo_registro.event_type);
     strcpy(acesso.user_id, novo_registro.user_id);
@@ -157,8 +150,8 @@ void inserir_novo_acesso(FILE *arquivo_dados, FILE *arquivo_indice, Registro nov
     fwrite(&acesso, sizeof(Acesso), 1, arquivo_dados);
 
     Indice novo_indice;
-    novo_indice.chave = acesso.sequencial;  // Chave única
-    novo_indice.file_offset = offset;  // Armazena o offset real
+    novo_indice.chave = acesso.sequencial;  
+    novo_indice.file_offset = offset;  
     fwrite(&novo_indice, sizeof(Indice), 1, arquivo_indice);
 }
 
@@ -180,7 +173,7 @@ void inserir_novo_produto(FILE *arquivo_dados, FILE *arquivo_indice, Registro no
     
     long offset = ftell(arquivo_dados);
     
-    produto.sequencial = offset / sizeof(Produto) + 1;  // Sequencial gerado
+    produto.sequencial = offset / sizeof(Produto) + 1;  
     produto.ativo = 1;  // Marca como ativo
     strcpy(produto.brand, novo_registro.brand);
     strcpy(produto.product_id, novo_registro.product_id);
@@ -189,8 +182,8 @@ void inserir_novo_produto(FILE *arquivo_dados, FILE *arquivo_indice, Registro no
     fwrite(&produto, sizeof(Produto), 1, arquivo_dados);
 
     Indice novo_indice;
-    novo_indice.chave = produto.sequencial;  // Chave única
-    novo_indice.file_offset = offset;  // Armazena o offset real
+    novo_indice.chave = produto.sequencial;  
+    novo_indice.file_offset = offset;  
     fwrite(&novo_indice, sizeof(Indice), 1, arquivo_indice);
 }
 
@@ -274,13 +267,11 @@ int ler_e_inserir_dados(const char *arquivo_csv, FILE *arquivo_produtos, FILE *a
 		produto_lido.sequencial=registro_lido.sequencial;
 		produto_lido.ativo=1;
 		
-		// Grava o registro no arquivo de produtos
-        long offset_produto = ftell(arquivo_produtos);  // Obtém o offset antes de gravar
+        long offset_produto = ftell(arquivo_produtos);  
         fwrite(&produto_lido, sizeof(Produto), 1, arquivo_produtos);
 
-        // Atualiza o índice com a chave e o offset
-        indice.chave = registro_lido.sequencial;   // Pode ser outra chave, dependendo do critério
-        indice.file_offset = offset_produto;        // Armazena o offset real
+        indice.chave = registro_lido.sequencial;   
+        indice.file_offset = offset_produto;        
         fwrite(&indice, sizeof(Indice), 1, arquivo_indice_produtos);
 		
 		strcpy(acesso_lido.event_time, registro_lido.event_time);
@@ -290,12 +281,11 @@ int ler_e_inserir_dados(const char *arquivo_csv, FILE *arquivo_produtos, FILE *a
 		acesso_lido.ativo=1;
 		
 		// Grava o registro no arquivo de acessos
-        long offset_acesso = ftell(arquivo_acessos);  // Obtém o offset antes de gravar
+        long offset_acesso = ftell(arquivo_acessos); 
         fwrite(&acesso_lido, sizeof(Acesso), 1, arquivo_acessos);
 
-        // Atualiza o índice com a chave e o offset
-        indice.chave = registro_lido.sequencial;   // Pode ser outra chave, dependendo do critério
-        indice.file_offset = offset_acesso;        // Armazena o offset real
+        indice.chave = registro_lido.sequencial;  
+        indice.file_offset = offset_acesso;        
         fwrite(&indice, sizeof(Indice), 1, arquivo_indice_acessos);
         
     	registro_lido.sequencial++;
@@ -420,10 +410,7 @@ int main() {
     buscar_produto(arquivo_produtos, arquivo_indice_produtos, 25); 
 
     encontrar_produto_maior_valor(arquivo_produtos);
-
-    //contar_ocorrencias_marca_em_acessos(arquivo_acessos);
 	
-    // Fechar arquivos
     fclose(arquivo_produtos);
     fclose(arquivo_indice_produtos);
     fclose(arquivo_acessos);
